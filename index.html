@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA用メタタグ（スマホアプリとしての表示設定） -->
+    <meta name="theme-color" content="#ff75c3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="クリスタゼリー">
+    
+    <title>クリスタライズ・ゼリー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: #fff0f5;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ff9a9e'/%3E%3Cstop offset='100%25' stop-color='%23fad0c4'/%3E%3C/linearGradient%3E%3ClinearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a18cd1'/%3E%3Cstop offset='100%25' stop-color='%23fbc2eb'/%3E%3C/linearGradient%3E%3ClinearGradient id='g3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2384fab0'/%3E%3Cstop offset='100%25' stop-color='%238fd3f4'/%3E%3C/linearGradient%3E%3Cfilter id='glow'%3E%3CfeGaussianBlur stdDeviation='4' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cg opacity='0.5' filter='url(%23glow)'%3E%3Crect x='50' y='60' width='70' height='40' rx='20' transform='rotate(25 85 80)' fill='url(%23g1)'/%3E%3Crect x='220' y='100' width='80' height='45' rx='22.5' transform='rotate(-35 260 122.5)' fill='url(%23g2)'/%3E%3Crect x='100' y='250' width='60' height='35' rx='17.5' transform='rotate(50 130 267.5)' fill='url(%23g3)'/%3E%3Crect x='280' y='280' width='90' height='50' rx='25' transform='rotate(-20 325 305)' fill='url(%23g1)'/%3E%3Ccircle cx='80' cy='180' r='8' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='300' cy='50' r='5' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='200' cy='350' r='10' fill='%23fff' opacity='0.7'/%3E%3Cpath d='M150 30 L154 42 L166 45 L154 48 L150 60 L146 48 L134 45 L146 42 Z' fill='%23fff' opacity='0.9'/%3E%3Cpath d='M350 200 L353 212 L365 215 L353 218 L350 230 L347 218 L335 215 L347 212 Z' fill='%23fff' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E"),
+                linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,228,230,0.5) 50%, rgba(255,255,255,0.3) 100%);
+            background-size: 100% 100%, 400px 400px, 200% 200%;
+            background-attachment: fixed;
+            animation: bg-float 25s linear infinite, bg-shimmer 10s ease-in-out infinite alternate;
+            transition: background-color 1s ease, background-image 1s ease;
+            touch-action: none;
+            overflow: hidden;
+        }
+
+        @keyframes bg-float {
+            0% { background-position: 50% 50%, 0 0, 0% 0%; }
+            100% { background-position: 50% 50%, 400px 400px, 100% 100%; }
+        }
+        @keyframes bg-shimmer {
+            0% { background-position: 50% 50%, 0 0, 0% 50%; }
+            100% { background-position: 50% 50%, 200px 200px, 100% 50%; }
+        }
+
+        /* 画面揺れアニメーション (4列消し用) */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(0px, 0px) rotate(0deg); }
+        }
+        .shake-animation {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        #game-canvas {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px) saturate(150%);
+            -webkit-backdrop-filter: blur(15px) saturate(150%);
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 
+                0 0 30px rgba(255, 255, 255, 0.8),
+                0 15px 50px rgba(236, 72, 153, 0.5),
+                inset 0 0 40px rgba(255, 255, 255, 0.7),
+                inset 0 0 15px rgba(255, 182, 193, 0.6);
+            border-radius: 24px;
+            transition: background-color 1s ease, border-color 1s ease, box-shadow 1s ease;
+        }
+
+        body.fever-mode #game-canvas {
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 4px solid rgba(244, 114, 182, 1);
+            box-shadow: 
+                0 0 50px rgba(236, 72, 153, 1),
+                0 0 100px rgba(139, 92, 246, 0.8),
+                inset 0 0 60px rgba(236, 72, 153, 0.8),
+                inset 0 0 30px rgba(167, 139, 250, 0.8);
+            animation: fever-pulse 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes fever-pulse {
+            from { filter: brightness(1); scale: 1; }
+            to { filter: brightness(1.2); scale: 1.01; }
+        }
+
+        .ui-panel {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(18px) saturate(120%);
+            -webkit-backdrop-filter: blur(18px) saturate(120%);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 
+                0 12px 40px 0 rgba(236, 72, 153, 0.3), 
+                inset 0 0 25px rgba(255, 255, 255, 0.8),
+                inset 0 -5px 15px rgba(0,0,0,0.05);
+            transition: all 1s ease;
+        }
+
+        body.fever-mode .ui-panel {
+            background: rgba(30, 41, 59, 0.6);
+            border: 3px solid rgba(167, 139, 250, 0.9);
+            color: #f8fafc;
+            box-shadow: 
+                0 12px 40px 0 rgba(139, 92, 246, 0.5), 
+                inset 0 0 35px rgba(236, 72, 153, 0.6);
+        }
+
+        .jelly-title {
+            background: linear-gradient(to bottom, #ff75c3, #a855f7, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 6px 8px rgba(236, 72, 153, 0.6));
+            position: relative;
+        }
+        
+        .purupuru:hover, .purupuru:active {
+            animation: jelly-bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        @keyframes jelly-bounce {
+            0%   { transform: scale(1, 1); }
+            30%  { transform: scale(1.15, 0.85); }
+            50%  { transform: scale(0.9, 1.1); }
+            70%  { transform: scale(1.05, 0.95); }
+            100% { transform: scale(1, 1); }
+        }
+
+        @keyframes float-visual {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float-visual 3s ease-in-out infinite;
+        }
+
+        .jelly-btn {
+            background: linear-gradient(135deg, rgba(255, 154, 158, 0.9), rgba(250, 208, 196, 0.9), rgba(168, 85, 247, 0.9));
+            backdrop-filter: blur(5px);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 10px 25px rgba(236, 72, 153, 0.5), 
+                inset 0 4px 15px rgba(255, 255, 255, 1),
+                inset 0 -4px 10px rgba(0,0,0,0.1);
+            color: white;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        .jelly-btn:hover {
+            transform: translateY(-3px) scale(1.08);
+            box-shadow: 
+                0 15px 35px rgba(236, 72, 153, 0.7), 
+                inset 0 4px 20px rgba(255, 255, 255, 1);
+            filter: brightness(1.1);
+        }
+
+        /* ゲージのスタイル修正 */
+        .gauge-fill {
+            transition: height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+        
+        .gauge-container {
+            background: rgba(255, 255, 255, 0.5);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.15), 0 5px 15px rgba(236,72,153,0.2);
+        }
+
+        .gauge-max {
+            animation: rainbow-bg 1.5s linear infinite, gauge-pulse 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes gauge-pulse {
+            from { box-shadow: 0 0 15px rgba(255,255,255,0.8); }
+            to { box-shadow: 0 0 30px rgba(255,255,255,1), 0 0 10px rgba(255,215,0,0.8); }
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px) saturate(120%);
+            -webkit-backdrop-filter: blur(10px) saturate(120%);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 8px 20px rgba(236, 72, 153, 0.3), 
+                inset 0 3px 10px rgba(255, 255, 255, 1),
+                inset 0 -3px 5px rgba(0,0,0,0.1);
+            user-select: none;
+            color: #ec4899;
+            font-weight: 800;
+            transition: all 0.1s;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+        }
+        .control-btn:active {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0.92) translateY(5px);
+            box-shadow: 
+                0 4px 10px rgba(236, 72, 153, 0.2), 
+                inset 0 2px 5px rgba(255, 255, 255, 0.8);
+        }
+        body.fever-mode .control-btn {
+            background: rgba(30, 41, 59, 0.6);
+            border: 3px solid rgba(167, 139, 250, 0.8);
+            color: #f8fafc;
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.6), inset 0 0 15px rgba(139, 92, 246, 0.7);
+            text-shadow: 0 0 5px rgba(255,255,255,0.8);
+        }
+
+    </style>
+</head>
+<body class="w-full h-screen flex flex-col items-center justify-center relative">
+
+    <div id="title-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white bg-opacity-20 backdrop-blur-lg">
+        <div class="flex flex-col items-center mb-4 purupuru cursor-pointer">
+            <h1 class="text-6xl md:text-8xl font-black jelly-title text-center leading-tight pb-2">
+                クリスタライズ
+            </h1>
+            <h2 class="text-5xl md:text-7xl font-black text-center leading-tight pb-4" style="background: linear-gradient(to bottom, #c084fc, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 4px 6px rgba(168,85,247,0.6));">
+                ゼリー
+            </h2>
+        </div>
+        
+        <!-- メインビジュアル：ゼリービーンズ -->
+        <div class="mb-8 relative purupuru animate-float cursor-pointer">
+            <svg width="280" height="140" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 10px 15px rgba(236,72,153,0.3));">
+                <defs>
+                    <linearGradient id='v-g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#ff9a9e'/><stop offset='100%' stop-color='#ff5e62'/></linearGradient>
+                    <linearGradient id='v-g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#a18cd1'/><stop offset='100%' stop-color='#fbc2eb'/></linearGradient>
+                    <linearGradient id='v-g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#84fab0'/><stop offset='100%' stop-color='#8fd3f4'/></linearGradient>
+                    <linearGradient id='v-g4' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='#f6d365'/><stop offset='100%' stop-color='#fda085'/></linearGradient>
+                </defs>
+                <!-- 奥のオレンジゼリー -->
+                <rect x="140" y="10" width="70" height="40" rx="20" transform="rotate(25 175 30)" fill="url(#v-g4)" />
+                <ellipse cx="170" cy="25" rx="10" ry="3" transform="rotate(25 170 25)" fill="white" opacity="0.6"/>
+                
+                <!-- 左のピンクゼリー -->
+                <rect x="20" y="30" width="90" height="55" rx="27.5" transform="rotate(-15 65 57.5)" fill="url(#v-g1)" />
+                <ellipse cx="50" cy="45" rx="15" ry="5" transform="rotate(-15 50 45)" fill="white" opacity="0.7"/>
+                
+                <!-- 手前のブルーグリーンゼリー -->
+                <rect x="70" y="60" width="80" height="45" rx="22.5" transform="rotate(5 110 82.5)" fill="url(#v-g3)" />
+                <ellipse cx="95" cy="72" rx="12" ry="4" transform="rotate(5 95 72)" fill="white" opacity="0.7"/>
+
+                <!-- 右のパープルゼリー -->
+                <rect x="120" y="35" width="100" height="60" rx="30" transform="rotate(-10 170 65)" fill="url(#v-g2)" />
+                <ellipse cx="150" cy="50" rx="18" ry="6" transform="rotate(-10 150 50)" fill="white" opacity="0.7"/>
+                
+                <!-- キラキラ -->
+                <path d="M 20 10 L 22 20 L 32 22 L 22 24 L 20 34 L 18 24 L 8 22 L 18 20 Z" fill="white" opacity="0.9" />
+                <path d="M 210 20 L 211 25 L 216 26 L 211 27 L 210 32 L 209 27 L 204 26 L 209 25 Z" fill="white" opacity="0.9" />
+                <path d="M 100 100 L 102 108 L 110 110 L 102 112 L 100 120 L 98 112 L 90 110 L 98 108 Z" fill="white" opacity="0.9" />
+            </svg>
+        </div>
+
+        <button id="start-btn" class="jelly-btn purupuru px-12 py-6 font-black rounded-full text-3xl tracking-wider z-10">
+            ゲームスタート
+        </button>
+
+        <!-- アプリインストールボタン（条件を満たしたブラウザでのみ出現します） -->
+        <button id="install-btn" class="hidden jelly-btn purupuru px-8 py-3 mt-4 font-bold rounded-full text-xl z-10" style="background: linear-gradient(135deg, #60a5fa, #a855f7);">
+            スマホにインストール
+        </button>
+        
+        <div class="mt-8 text-sm md:text-base text-gray-700 text-center ui-panel p-6 max-w-md mx-auto relative overflow-hidden cursor-default z-10">
+            <div class="absolute inset-0 bg-gradient-to-br from-white via-transparent to-pink-100 opacity-40"></div>
+            <p class="text-pink-500 font-black mb-3 relative z-10 tracking-widest drop-shadow-sm text-lg">◆ 操作方法 ◆</p>
+            <p class="mb-2 relative z-10 font-bold"><span class="text-purple-500 text-base">PC:</span> 矢印キーで移動・回転<br>Spaceで落下、Shiftでホールド</p>
+            <p class="relative z-10 font-bold mt-3"><span class="text-blue-500 text-base">スマホ:</span> 画面下のぷるぷるボタン</p>
+        </div>
+    </div>
+
+    <div id="game-container" class="hidden w-full max-w-4xl px-2 h-full flex flex-col justify-center items-center">
+        <!-- スマホ用のスコア・レベル・フィーバー表示 -->
+        <div class="md:hidden w-full flex justify-between items-center px-4 py-2 mb-2 z-20">
+            <div class="ui-panel px-3 py-1 font-bold text-pink-600 shadow-sm text-xs">SCORE: <span id="m-score">0</span></div>
+            <div id="m-fever-text" class="hidden text-pink-500 font-black animate-pulse text-sm">FEVER!</div>
+            <div class="ui-panel px-3 py-1 font-bold text-blue-600 shadow-sm text-xs">LV: <span id="m-level">1</span></div>
+        </div>
+
+        <!-- ゲーム画面のメインレイアウト -->
+        <div class="flex flex-row justify-center items-start w-full gap-2 md:gap-8 h-[65vh] md:h-[80vh]">
+            
+            <!-- Left Panel: Hold & Stats -->
+            <div class="flex flex-col justify-start items-center w-24 md:w-36 gap-4 h-full pb-4">
+                <div class="ui-panel w-full p-2 flex flex-col items-center">
+                    <h2 class="text-xs md:text-sm font-bold text-gray-500 mb-1">HOLD</h2>
+                    <canvas id="hold-canvas" width="80" height="80" class="w-16 h-16 md:w-20 md:h-20"></canvas>
+                </div>
+                <div class="ui-panel w-full p-3 hidden md:flex flex-col items-center text-center">
+                    <h2 class="text-sm font-bold text-gray-500">SCORE</h2>
+                    <p id="score" class="text-xl md:text-3xl font-black text-pink-600">0</p>
+                </div>
+                <div class="ui-panel w-full p-3 hidden md:flex flex-col items-center text-center">
+                    <h2 class="text-sm font-bold text-gray-500">LEVEL</h2>
+                    <p id="level" class="text-2xl font-black text-blue-600">1</p>
+                    <p class="text-xs text-gray-400 mt-1">LINES: <span id="lines">0</span></p>
+                </div>
+                <div id="d-fever-text" class="hidden text-pink-500 font-black text-2xl animate-pulse mt-4 text-center">FEVER<br>TIME!</div>
+                
+                <button id="pause-btn" class="jelly-btn purupuru mt-auto mb-2 px-4 py-2 font-bold rounded-full text-xs md:text-sm tracking-wider">
+                    一時停止
+                </button>
+            </div>
+
+            <!-- Center: Main Board -->
+            <div class="relative h-full aspect-[1/2]">
+                <canvas id="game-canvas" width="240" height="480" class="h-full w-full object-contain"></canvas>
+            </div>
+
+            <!-- Right Panel: Next & Gauge -->
+            <div class="flex flex-col justify-start items-center w-24 md:w-36 gap-4 h-full pb-4">
+                <div class="ui-panel w-full p-2 flex flex-col items-center">
+                    <h2 class="text-xs md:text-sm font-bold text-gray-500 mb-1">NEXT</h2>
+                    <canvas id="next-canvas" width="80" height="160" class="w-16 h-32 md:w-20 md:h-40"></canvas>
+                </div>
+
+                <!-- Jewel Gauge (潰れないように明示的な高さを指定) -->
+                <div class="ui-panel w-full p-2 flex flex-col items-center justify-between h-48 md:h-64 relative overflow-hidden">
+                    <h2 class="text-xs md:text-sm font-bold text-gray-500 z-10">GAUGE</h2>
+                    <!-- Flex-growを外し、絶対的な高さを指定 -->
+                    <div class="w-6 md:w-10 h-32 md:h-48 gauge-container rounded-full relative overflow-hidden z-10 my-2">
+                        <div id="gauge-fill" class="gauge-fill absolute bottom-0 left-0 w-full bg-gradient-to-t from-pink-400 to-purple-500 rounded-full" style="height: 0%;"></div>
+                    </div>
+                    <div id="gauge-text" class="text-xs font-bold text-pink-600 z-10 drop-shadow-sm">0%</div>
+                    
+                    <div id="gauge-bg-effect" class="absolute inset-0 bg-gradient-to-t from-pink-200 to-purple-200 opacity-0 transition-opacity duration-500"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Controls -->
+        <div class="md:hidden w-full flex justify-center gap-4 mt-4 z-20 pb-4">
+            <button id="btn-left" class="control-btn purupuru">◀</button>
+            <button id="btn-down" class="control-btn purupuru">▼</button>
+            <button id="btn-right" class="control-btn purupuru">▶</button>
+            <button id="btn-rotate" class="control-btn purupuru">↻</button>
+            <div class="flex flex-col gap-2">
+                <button id="btn-hold" class="control-btn purupuru !text-sm !font-bold !w-14 !h-14 bg-gray-100 !text-gray-600">H</button>
+                <button id="btn-drop" class="control-btn purupuru !text-xl !font-bold !w-14 !h-14 bg-pink-100 !text-pink-600">⇓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div id="pause-modal" class="hidden absolute inset-0 z-40 bg-black bg-opacity-30 flex items-center justify-center backdrop-blur-md">
+        <div class="bg-white bg-opacity-80 backdrop-blur-lg border-2 border-white rounded-3xl p-8 w-[22rem] text-center shadow-2xl">
+            <h2 class="text-3xl font-black text-purple-600 mb-6 drop-shadow-md">PAUSE</h2>
+            <div class="flex flex-col gap-4">
+                
+                <!-- BGM Volume Slider -->
+                <div class="bg-white bg-opacity-60 p-4 rounded-2xl border-2 border-pink-200 shadow-inner">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-bold text-gray-700 text-sm">BGM 音量</label>
+                        <span id="bgm-vol-text" class="text-pink-600 font-black text-sm">50%</span>
+                    </div>
+                    <input type="range" id="bgm-slider" min="0" max="100" step="10" value="50" class="w-full accent-pink-500 cursor-pointer">
+                </div>
+
+                <!-- SE Volume Slider -->
+                <div class="bg-white bg-opacity-60 p-4 rounded-2xl border-2 border-blue-200 shadow-inner">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="font-bold text-gray-700 text-sm">SE 音量</label>
+                        <span id="se-vol-text" class="text-blue-600 font-black text-sm">50%</span>
+                    </div>
+                    <input type="range" id="se-slider" min="0" max="100" step="10" value="50" class="w-full accent-blue-500 cursor-pointer">
+                </div>
+
+                <div class="h-2"></div>
+
+                <button id="resume-btn" class="jelly-btn purupuru px-8 py-3 font-bold rounded-full text-xl">再開する</button>
+                <button id="quit-btn" class="px-8 py-3 bg-white bg-opacity-50 text-gray-700 border-2 border-gray-300 font-bold rounded-full text-xl shadow-sm hover:bg-gray-100 purupuru">タイトルへ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="hidden absolute inset-0 z-40 bg-black bg-opacity-40 flex items-center justify-center backdrop-blur-lg">
+        <div class="bg-white bg-opacity-80 backdrop-blur-xl rounded-[3rem] p-10 text-center shadow-2xl border-4 border-pink-400 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 opacity-30 mix-blend-overlay"></div>
+            <h2 class="text-6xl font-black jelly-title mb-4 relative">GAME OVER</h2>
+            <p class="text-gray-800 font-bold mb-8 text-xl relative">ゼリーが溢れちゃった！</p>
+            <div class="bg-white bg-opacity-60 border-2 border-pink-300 rounded-3xl p-6 mb-8 shadow-inner relative">
+                <p class="text-gray-600 text-lg font-bold mb-2">FINAL SCORE</p>
+                <p id="final-score" class="text-5xl font-black text-pink-600">0</p>
+            </div>
+            <button id="retry-btn" class="jelly-btn purupuru px-10 py-5 font-bold rounded-full text-2xl relative">
+                もう一度遊ぶ
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const holdCanvas = document.getElementById('hold-canvas');
+        const holdCtx = holdCanvas.getContext('2d');
+        const nextCanvas = document.getElementById('next-canvas');
+        const nextCtx = nextCanvas.getContext('2d');
+
+        const ROWS = 20;
+        const COLS = 10;
+        const BLOCK_SIZE = 24;
+        const GAUGE_MAX = 100;
+
+        ctx.scale(1, 1);
+
+        const COLORS = [
+            null,
+            '#00d2ff', // I - Cyan
+            '#0070f3', // J - Blue
+            '#ff9f43', // L - Orange
+            '#ffd700', // O - Yellow
+            '#2ecc71', // S - Green
+            '#cd84f1', // T - Purple
+            '#ff4757', // Z - Red
+            'prism'    // 8 - Special Prism Jelly
+        ];
+
+        const SHAPES = [
+            [],
+            [[1, 1, 1, 1]], // I
+            [[2, 0, 0], [2, 2, 2]], // J
+            [[0, 0, 3], [3, 3, 3]], // L
+            [[4, 4], [4, 4]], // O
+            [[0, 5, 5], [5, 5, 0]], // S
+            [[0, 6, 0], [6, 6, 6]], // T
+            [[7, 7, 0], [0, 7, 7]]  // Z
+        ];
+
+        let board = [];
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let gauge = 0;
+        let isFever = false;
+        let feverTimer = null;
+        let dropInterval = 1000;
+        let dropCounter = 0;
+        let lastTime = 0;
+
+        let piece = null;
+        let holdPiece = null;
+        let canHold = true;
+        let nextPieces = [];
+
+        let animationId = null;
+        let isPaused = false;
+        let isGameOver = false;
+        let particles = []; // 演出用パーティクル
+
+        // --- Audio Engine ---
+        let audioCtx = null;
+        let masterGain = null;
+        let bgmGain = null;
+        let seGain = null;
+        let bgmTimeout = null;
+
+        let currentBgmVolume = 50;
+        let currentSeVolume = 50;
+        const MAX_GAIN = 0.5; 
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 1.0;
+                masterGain.connect(audioCtx.destination);
+
+                bgmGain = audioCtx.createGain();
+                bgmGain.gain.value = (currentBgmVolume / 100) * MAX_GAIN;
+                bgmGain.connect(masterGain);
+
+                seGain = audioCtx.createGain();
+                seGain.gain.value = (currentSeVolume / 100) * MAX_GAIN;
+                seGain.connect(masterGain);
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSE(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(seGain);
+            const now = audioCtx.currentTime;
+
+            switch(type) {
+                case 'move':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now); osc.stop(now + 0.05);
+                    break;
+                case 'rotate':
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now); osc.stop(now + 0.1);
+                    break;
+                case 'drop':
+                    osc.type = (level >= 4 || isFever) ? 'square' : 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc.start(now); osc.stop(now + 0.15);
+                    break;
+                case 'hold':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1000, now);
+                    osc.frequency.linearRampToValueAtTime(400, now + 0.2);
+                    gain.gain.setValueAtTime(0.4, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                    osc.start(now); osc.stop(now + 0.2);
+                    break;
+                case 'clear': // 1~3列消し
+                    [800, 1000, 1200, 1600].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(seGain);
+                        o.type = 'sine';
+                        o.frequency.value = freq;
+                        g.gain.setValueAtTime(0, now);
+                        g.gain.linearRampToValueAtTime(0.4, now + 0.05 + i*0.05);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                        o.start(now + i*0.05); o.stop(now + 0.5 + i*0.05);
+                    });
+                    break;
+                case 'burst': // 4列消し (ガシャーーーーン！)
+                    // Noise Crash
+                    const bufSize = audioCtx.sampleRate * 0.5;
+                    const buffer = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseFilter = audioCtx.createBiquadFilter();
+                    noiseFilter.type = 'bandpass';
+                    noiseFilter.frequency.value = 800;
+                    const noiseGain = audioCtx.createGain();
+                    noiseGain.gain.setValueAtTime(1, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    noise.connect(noiseFilter);
+                    noiseFilter.connect(noiseGain);
+                    noiseGain.connect(seGain);
+                    noise.start(now);
+                    // Chimes
+                    [1200, 1600, 2400, 3200].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(seGain);
+                        o.type = 'triangle';
+                        o.frequency.value = freq;
+                        g.gain.setValueAtTime(0, now);
+                        g.gain.linearRampToValueAtTime(0.6, now + 0.05 + i*0.05);
+                        g.gain.exponentialRampToValueAtTime(0.01, now + 1.0);
+                        o.start(now + i*0.05); o.stop(now + 1.0 + i*0.05);
+                    });
+                    break;
+                case 'fever':
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(2000, now + 0.5);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 1.0);
+                    osc.start(now); osc.stop(now + 1.0);
+                    break;
+                case 'gameover':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 1.5);
+                    gain.gain.setValueAtTime(0.5, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 1.5);
+                    osc.start(now); osc.stop(now + 1.5);
+                    break;
+            }
+        }
+
+        const bgmScales = {
+            normal: [523.25, 659.25, 783.99, 1046.50, 1318.51],
+            fever: [880.00, 1046.50, 1318.51, 1567.98, 1760.00]
+        };
+
+        function loopBGM() {
+            if (isPaused || isGameOver || !audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(bgmGain);
+
+            const scale = isFever ? bgmScales.fever : bgmScales.normal;
+            const freq = scale[Math.floor(Math.random() * scale.length)];
+            
+            osc.type = isFever ? 'triangle' : 'sine';
+            osc.frequency.value = freq;
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.1, now + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+            osc.start(now);
+            osc.stop(now + 0.3);
+
+            const nextNoteTime = isFever ? 150 : 300;
+            bgmTimeout = setTimeout(loopBGM, nextNoteTime);
+        }
+
+        class Tetromino {
+            constructor(type, isPrism = false) {
+                if (isPrism) {
+                    this.matrix = [[8]];
+                    this.type = 8;
+                } else {
+                    this.matrix = SHAPES[type];
+                    this.type = type;
+                }
+                this.x = Math.floor(COLS / 2) - Math.floor(this.matrix[0].length / 2);
+                this.y = 0;
+            }
+        }
+
+        function createBoard() {
+            return Array.from({length: ROWS}, () => Array(COLS).fill(0));
+        }
+
+        function rotate(matrix, dir) {
+            const rotated = matrix[0].map((val, index) => matrix.map(row => row[index]));
+            if (dir > 0) return rotated.map(row => row.reverse());
+            return rotated.reverse();
+        }
+
+        function collide(board, piece) {
+            const m = piece.matrix;
+            for (let y = 0; y < m.length; ++y) {
+                for (let x = 0; x < m[y].length; ++x) {
+                    if (m[y][x] !== 0 &&
+                        (board[y + piece.y] && board[y + piece.y][x + piece.x]) !== 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function playerRotate(dir) {
+            if (piece.type === 8) return;
+            const pos = piece.x;
+            let offset = 1;
+            piece.matrix = rotate(piece.matrix, dir);
+            playSE('rotate');
+            while (collide(board, piece)) {
+                piece.x += offset;
+                offset = -(offset + (offset > 0 ? 1 : -1));
+                if (offset > piece.matrix[0].length) {
+                    piece.matrix = rotate(piece.matrix, -dir);
+                    piece.x = pos;
+                    return;
+                }
+            }
+        }
+
+        function playerMove(dir) {
+            piece.x += dir;
+            if (collide(board, piece)) {
+                piece.x -= dir;
+            } else {
+                playSE('move');
+            }
+        }
+
+        function getGhostY() {
+            let ghostY = piece.y;
+            while (!collide(board, { ...piece, y: ghostY + 1 })) {
+                ghostY++;
+            }
+            return ghostY;
+        }
+
+        function playerDrop() {
+            piece.y++;
+            if (collide(board, piece)) {
+                piece.y--;
+                playSE('drop');
+                merge(board, piece);
+                resetPiece();
+                arenaSweep();
+            }
+            dropCounter = 0;
+        }
+
+        function playerHardDrop() {
+            piece.y = getGhostY();
+            playSE('drop');
+            merge(board, piece);
+            resetPiece();
+            arenaSweep();
+            dropCounter = 0;
+        }
+
+        function merge(board, piece) {
+            piece.matrix.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        board[y + piece.y][x + piece.x] = value;
+                    }
+                });
+            });
+        }
+
+        // パーティクル生成 (4列消し用)
+        function createBurstParticles(baseY, count) {
+            for(let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: baseY * BLOCK_SIZE + Math.random() * BLOCK_SIZE * 4,
+                    vx: (Math.random() - 0.5) * 15, // 横に弾け飛ぶ
+                    vy: (Math.random() - 0.5) * 15 - 5, // 上方向へ強めに
+                    life: 1.0,
+                    size: Math.random() * 8 + 4,
+                    color: COLORS[Math.floor(Math.random() * 7) + 1]
+                });
+            }
+        }
+
+        function updateParticles() {
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3; // 重力
+                p.life -= 0.015;
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = p.color;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.life * Math.PI * 4); // キラキラ回転
+                ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                ctx.restore();
+            });
+            ctx.globalAlpha = 1.0;
+            ctx.shadowBlur = 0;
+        }
+
+        function arenaSweep() {
+            let linesCleared = 0;
+            let clearedY = [];
+            let hasPrism = false;
+
+            outer: for (let y = board.length - 1; y >= 0; --y) {
+                for (let x = 0; x < board[y].length; ++x) {
+                    if (board[y][x] === 0) continue outer;
+                }
+                
+                if (board[y].includes(8)) hasPrism = true;
+
+                const row = board.splice(y, 1)[0].fill(0);
+                board.unshift(row);
+                ++y;
+                linesCleared++;
+                clearedY.push(y);
+            }
+
+            if (hasPrism && linesCleared > 0) {
+                activateFever();
+            }
+
+            if (linesCleared > 0) {
+                lines += linesCleared;
+                let lineScore = (linesCleared * 100) * (isFever ? 3 : 1) * level;
+
+                // 4列消し (ジュエル・バースト) 演出
+                if (linesCleared >= 4) {
+                    playSE('burst');
+                    // 画面揺れCSS発動
+                    const gameCanvasElement = document.getElementById('game-canvas');
+                    gameCanvasElement.classList.remove('shake-animation');
+                    void gameCanvasElement.offsetWidth; // リフローしてアニメーション再起動
+                    gameCanvasElement.classList.add('shake-animation');
+                    
+                    // パーティクル発生 (一番上の消去ラインを基準点に)
+                    createBurstParticles(Math.min(...clearedY), 120);
+                    
+                    // ボーナススコア＆大幅ゲージアップ
+                    lineScore *= 1.5;
+                    gauge += 40; 
+                } else {
+                    playSE('clear');
+                    gauge += linesCleared * 10;
+                }
+                
+                score += lineScore;
+                
+                if (gauge > GAUGE_MAX) gauge = GAUGE_MAX;
+                
+                if (lines >= level * 10) {
+                    level++;
+                    updateSpeed();
+                }
+                updateUI();
+            }
+        }
+
+        function activateFever() {
+            if (!isFever) playSE('fever');
+            isFever = true;
+            document.body.classList.add('fever-mode');
+            document.getElementById('m-fever-text')?.classList.remove('hidden');
+            document.getElementById('d-fever-text')?.classList.remove('hidden');
+            gauge = 0; 
+            updateSpeed();
+
+            if(feverTimer) clearTimeout(feverTimer);
+            feverTimer = setTimeout(() => {
+                isFever = false;
+                document.body.classList.remove('fever-mode');
+                document.getElementById('m-fever-text')?.classList.add('hidden');
+                document.getElementById('d-fever-text')?.classList.add('hidden');
+                updateSpeed();
+                updateUI();
+            }, 15000);
+        }
+
+        function updateSpeed() {
+            if (isFever) {
+                dropInterval = 1000;
+            } else {
+                dropInterval = Math.max(100, 1000 - (level - 1) * 150);
+            }
+        }
+
+        function getRandomType() {
+            return Math.floor(Math.random() * 7) + 1;
+        }
+
+        function resetPiece() {
+            canHold = true;
+            if (gauge >= GAUGE_MAX) {
+                piece = new Tetromino(8, true);
+                gauge = 0; 
+            } else {
+                piece = new Tetromino(nextPieces.shift());
+                nextPieces.push(getRandomType());
+            }
+            updateUI(); 
+            if (collide(board, piece)) {
+                gameOver();
+            }
+        }
+
+        function playerHold() {
+            if (!canHold) return;
+            playSE('hold');
+            const currentType = piece.type;
+            
+            if (holdPiece === null) {
+                holdPiece = currentType;
+                resetPiece();
+            } else {
+                const temp = holdPiece;
+                holdPiece = currentType;
+                piece = new Tetromino(temp, temp === 8);
+            }
+            
+            canHold = false;
+            dropCounter = 0;
+            updateUI(); 
+        }
+
+        function drawMatrix(matrix, offset, context, isHoldNext = false, isGhost = false) {
+            matrix.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        drawBlock(context, offset.x + x, offset.y + y, value, isHoldNext, isGhost);
+                    }
+                });
+            });
+        }
+
+        function lightenColor(color, percent) {
+            if(!color || color==='prism') return '#ffffff';
+            const num = parseInt(color.replace("#",""),16),
+            amt = Math.round(2.55 * percent),
+            R = (num >> 16) + amt,
+            G = (num >> 8 & 0x00FF) + amt,
+            B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+        }
+
+        function darkenColor(color, percent) {
+            if(!color || color==='prism') return '#ffffff';
+            const num = parseInt(color.replace("#",""),16),
+            amt = Math.round(2.55 * percent),
+            R = (num >> 16) - amt,
+            G = (num >> 8 & 0x00FF) - amt,
+            B = (num & 0x0000FF) - amt;
+            return "#" + (0x1000000 + (R>0?R>255?255:R:0)*0x10000 + (G>0?G>255?255:G:0)*0x100 + (B>0?B>255?255:B:0)).toString(16).slice(1);
+        }
+
+        function drawBlock(context, x, y, type, isHoldNext, isGhost) {
+            const size = isHoldNext ? 20 : BLOCK_SIZE;
+            const px = x * size;
+            const py = y * size;
+
+            const isCrystal = level >= 4 || isFever;
+            const baseColor = COLORS[type];
+
+            if (isGhost) {
+                context.globalAlpha = 0.3; 
+                
+                if (type === 8) {
+                    context.fillStyle = '#ffffff';
+                    context.strokeStyle = '#ffffff';
+                } else {
+                    context.fillStyle = baseColor;
+                    context.strokeStyle = baseColor;
+                }
+
+                context.beginPath();
+                context.roundRect(px + 1, py + 1, size - 2, size - 2, 4);
+                context.fill();
+
+                context.globalAlpha = 0.8; 
+                context.lineWidth = 2;
+                context.stroke();
+
+                context.globalAlpha = 1.0; 
+                context.lineWidth = 1;
+                return;
+            }
+            
+            if (type === 8) {
+                const time = Date.now() / 150;
+                const r = Math.sin(time) * 127 + 128;
+                const g = Math.sin(time + 2) * 127 + 128;
+                const b = Math.sin(time + 4) * 127 + 128;
+                
+                const grad = context.createRadialGradient(px+size/2, py+size/2, 2, px+size/2, py+size/2, size/1.5);
+                grad.addColorStop(0, `rgba(255,255,255,0.9)`);
+                grad.addColorStop(0.6, `rgb(${r},${g},${b})`);
+                grad.addColorStop(1, `rgba(${r*0.8},${g*0.8},${b*0.8},0.8)`);
+                context.fillStyle = grad;
+                
+                context.beginPath();
+                context.roundRect(px + 1, py + 1, size - 2, size - 2, size/2);
+                context.fill();
+
+                context.shadowColor = `rgb(${r},${g},${b})`;
+                context.shadowBlur = 20;
+                context.fillStyle = 'rgba(255,255,255,0.9)';
+                context.beginPath();
+                context.arc(px + size*0.3, py + size*0.3, size*0.2, 0, Math.PI*2);
+                context.fill();
+                context.shadowBlur = 0;
+                return;
+            }
+
+            if (isCrystal) {
+                context.fillStyle = baseColor;
+                context.fillRect(px, py, size, size);
+                
+                context.fillStyle = 'rgba(255,255,255,0.7)';
+                context.beginPath();
+                context.moveTo(px, py);
+                context.lineTo(px + size, py);
+                context.lineTo(px + size - 6, py + 6);
+                context.lineTo(px + 6, py + 6);
+                context.lineTo(px + 6, py + size - 6);
+                context.lineTo(px, py + size);
+                context.fill();
+
+                context.fillStyle = 'rgba(0,0,0,0.5)';
+                context.beginPath();
+                context.moveTo(px + size, py + size);
+                context.lineTo(px, py + size);
+                context.lineTo(px + 6, py + size - 6);
+                context.lineTo(px + size - 6, py + size - 6);
+                context.lineTo(px + size - 6, py + 6);
+                context.lineTo(px + size, py);
+                context.fill();
+
+                context.strokeStyle = 'rgba(255,255,255,0.9)';
+                context.lineWidth = 1;
+                context.strokeRect(px, py, size, size);
+
+            } else {
+                const pad = 2;
+                const r = 8;
+                
+                const grad = context.createLinearGradient(px, py, px, py+size);
+                grad.addColorStop(0, lightenColor(baseColor, 30));
+                grad.addColorStop(0.5, baseColor);
+                grad.addColorStop(1, darkenColor(baseColor, 20));
+                context.fillStyle = grad;
+
+                context.beginPath();
+                context.roundRect(px + pad, py + pad, size - pad*2, size - pad*2, r);
+                context.fill();
+                
+                context.strokeStyle = 'rgba(0,0,0,0.15)';
+                context.lineWidth = 3;
+                context.stroke();
+
+                context.fillStyle = 'rgba(255,255,255,0.7)';
+                context.beginPath();
+                context.ellipse(px + size/2, py + size*0.25, size*0.35, size*0.15, 0, 0, Math.PI*2);
+                context.fill();
+                
+                context.beginPath();
+                context.arc(px + size*0.25, py + size*0.25, size*0.08, 0, Math.PI*2);
+                context.fill();
+            }
+        }
+
+        function drawHoldAndNext() {
+            holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+            holdCtx.fillStyle = 'rgba(0,0,0,0)'; 
+            holdCtx.fillRect(0, 0, holdCanvas.width, holdCanvas.height);
+            
+            if (holdPiece !== null) {
+                let m = holdPiece === 8 ? [[8]] : SHAPES[holdPiece];
+                const offsetX = (holdCanvas.width / 20 - m[0].length) / 2;
+                const offsetY = (holdCanvas.height / 20 - m.length) / 2;
+                drawMatrix(m, {x: offsetX, y: offsetY}, holdCtx, true, false);
+            }
+
+            nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+            nextCtx.fillStyle = 'rgba(0,0,0,0)';
+            nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+
+            nextPieces.forEach((type, index) => {
+                let m = SHAPES[type];
+                const offsetX = (nextCanvas.width / 20 - m[0].length) / 2;
+                const offsetY = index * 4 + 1;
+                drawMatrix(m, {x: offsetX, y: offsetY}, nextCtx, true, false);
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (isFever) {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+            } else {
+                const time = Date.now() / 1000;
+                const alpha = 0.1 + Math.sin(time) * 0.05;
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = isFever ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 1;
+            for(let i=0; i<=ROWS; i++) {
+                ctx.beginPath(); ctx.moveTo(0, i*BLOCK_SIZE); ctx.lineTo(canvas.width, i*BLOCK_SIZE); ctx.stroke();
+            }
+            for(let j=0; j<=COLS; j++) {
+                ctx.beginPath(); ctx.moveTo(j*BLOCK_SIZE, 0); ctx.lineTo(j*BLOCK_SIZE, canvas.height); ctx.stroke();
+            }
+
+            drawMatrix(board, {x: 0, y: 0}, ctx);
+            
+            if (piece) {
+                const ghostY = getGhostY();
+                drawMatrix(piece.matrix, {x: piece.x, y: ghostY}, ctx, false, true);
+                drawMatrix(piece.matrix, {x: piece.x, y: piece.y}, ctx);
+            }
+
+            // パーティクルの描画を追加
+            drawParticles();
+        }
+
+        function updateUI() {
+            document.getElementById('score').innerText = score;
+            document.getElementById('m-score').innerText = score;
+            document.getElementById('level').innerText = level;
+            document.getElementById('m-level').innerText = level;
+            document.getElementById('lines').innerText = lines;
+            
+            const fillPercent = Math.min(100, (gauge / GAUGE_MAX) * 100);
+            const gaugeFill = document.getElementById('gauge-fill');
+            const gaugeText = document.getElementById('gauge-text');
+            const gaugeBg = document.getElementById('gauge-bg-effect');
+            
+            gaugeFill.style.height = `${fillPercent}%`;
+            gaugeText.innerText = `${Math.floor(fillPercent)}%`;
+
+            if (fillPercent >= 100) {
+                gaugeFill.classList.add('gauge-max');
+                gaugeBg.style.opacity = '1';
+                gaugeText.classList.add('animate-pulse');
+            } else {
+                gaugeFill.classList.remove('gauge-max');
+                gaugeBg.style.opacity = '0';
+                gaugeText.classList.remove('animate-pulse');
+            }
+
+            drawHoldAndNext();
+        }
+
+        function update(time = 0) {
+            if (isPaused || isGameOver) return;
+
+            const deltaTime = time - lastTime;
+            lastTime = time;
+
+            dropCounter += deltaTime;
+            if (dropCounter > dropInterval) {
+                playerDrop();
+            }
+
+            updateParticles(); // パーティクル位置更新
+
+            draw();
+            animationId = requestAnimationFrame(update);
+        }
+
+        function startGame() {
+            initAudio(); 
+            
+            board = createBoard();
+            score = 0;
+            lines = 0;
+            level = 1;
+            gauge = 0;
+            isFever = false;
+            holdPiece = null;
+            nextPieces = [getRandomType(), getRandomType()];
+            isGameOver = false;
+            isPaused = false;
+            particles = []; // パーティクル初期化
+            
+            document.body.classList.remove('fever-mode');
+            document.getElementById('m-fever-text')?.classList.add('hidden');
+            document.getElementById('d-fever-text')?.classList.add('hidden');
+            
+            document.getElementById('title-screen').classList.add('hidden');
+            document.getElementById('game-over-modal').classList.add('hidden');
+            document.getElementById('pause-modal').classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+
+            updateSpeed();
+            piece = new Tetromino(getRandomType());
+            updateUI();
+            
+            lastTime = performance.now();
+            if(animationId) cancelAnimationFrame(animationId);
+            if(bgmTimeout) clearTimeout(bgmTimeout); 
+            update(lastTime);
+            loopBGM(); 
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            playSE('gameover');
+            cancelAnimationFrame(animationId);
+            if(bgmTimeout) clearTimeout(bgmTimeout); 
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('game-over-modal').classList.remove('hidden');
+        }
+
+        function togglePause() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            if (isPaused) {
+                cancelAnimationFrame(animationId);
+                if(bgmTimeout) clearTimeout(bgmTimeout);
+                document.getElementById('pause-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('pause-modal').classList.add('hidden');
+                lastTime = performance.now();
+                update(lastTime);
+                loopBGM(); 
+            }
+            document.activeElement.blur();
+        }
+
+        document.addEventListener('keydown', event => {
+            if ([32, 37, 38, 39, 40].includes(event.keyCode)) {
+                event.preventDefault();
+            }
+
+            if (isPaused || isGameOver) return;
+            switch(event.keyCode) {
+                case 37: playerMove(-1); break;
+                case 39: playerMove(1); break;
+                case 40: playerDrop(); break;
+                case 38: playerRotate(1); break;
+                case 32: playerHardDrop(); break;
+                case 16: playerHold(); break;
+                case 27: togglePause(); break;
+            }
+        });
+
+        // UI Buttons
+        document.getElementById('start-btn').addEventListener('click', (e) => { e.target.blur(); startGame(); });
+        document.getElementById('retry-btn').addEventListener('click', (e) => { e.target.blur(); startGame(); });
+        document.getElementById('pause-btn').addEventListener('click', (e) => { e.target.blur(); initAudio(); togglePause(); });
+        document.getElementById('resume-btn').addEventListener('click', (e) => { e.target.blur(); togglePause(); });
+        document.getElementById('quit-btn').addEventListener('click', () => {
+            document.getElementById('pause-modal').classList.add('hidden');
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('title-screen').classList.remove('hidden');
+            isGameOver = true;
+        });
+
+        // Volume Sliders
+        document.getElementById('bgm-slider').addEventListener('input', (e) => {
+            currentBgmVolume = parseInt(e.target.value);
+            document.getElementById('bgm-vol-text').innerText = `${currentBgmVolume}%`;
+            if (bgmGain) {
+                bgmGain.gain.value = (currentBgmVolume / 100) * MAX_GAIN;
+            }
+        });
+
+        document.getElementById('se-slider').addEventListener('input', (e) => {
+            currentSeVolume = parseInt(e.target.value);
+            document.getElementById('se-vol-text').innerText = `${currentSeVolume}%`;
+            if (seGain) {
+                seGain.gain.value = (currentSeVolume / 100) * MAX_GAIN;
+            }
+        });
+
+        // Mobile Controls
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        const btnDown = document.getElementById('btn-down');
+        const btnRotate = document.getElementById('btn-rotate');
+        const btnHold = document.getElementById('btn-hold');
+        const btnDrop = document.getElementById('btn-drop');
+
+        [btnLeft, btnRight, btnDown, btnRotate, btnHold, btnDrop].forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (isPaused || isGameOver) return;
+                switch(btn.id) {
+                    case 'btn-left': playerMove(-1); break;
+                    case 'btn-right': playerMove(1); break;
+                    case 'btn-down': playerDrop(); break;
+                    case 'btn-rotate': playerRotate(1); break;
+                    case 'btn-hold': playerHold(); break;
+                    case 'btn-drop': playerHardDrop(); break;
+                }
+            }, {passive: false});
+        });
+
+        // --- PWA サポート (Single File 完結型) ---
+        function initPWA() {
+            // 1. ホーム画面用アイコン（SVG）を生成
+            const svgIcon = `<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><rect width="512" height="512" fill="#fff0f5" rx="100"/><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff9a9e"/><stop offset="100%" stop-color="#ff5e62"/></linearGradient><linearGradient id="g2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#a18cd1"/><stop offset="100%" stop-color="#fbc2eb"/></linearGradient><linearGradient id="g3" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#84fab0"/><stop offset="100%" stop-color="#8fd3f4"/></linearGradient></defs><g transform="translate(136, 196) scale(1.5)"><rect x="20" y="30" width="90" height="55" rx="27.5" transform="rotate(-15 65 57.5)" fill="url(#g1)" /><ellipse cx="50" cy="45" rx="15" ry="5" transform="rotate(-15 50 45)" fill="white" opacity="0.7"/><rect x="70" y="60" width="80" height="45" rx="22.5" transform="rotate(5 110 82.5)" fill="url(#g3)" /><ellipse cx="95" cy="72" rx="12" ry="4" transform="rotate(5 95 72)" fill="white" opacity="0.7"/><rect x="120" y="35" width="100" height="60" rx="30" transform="rotate(-10 170 65)" fill="url(#g2)" /><ellipse cx="150" cy="50" rx="18" ry="6" transform="rotate(-10 150 50)" fill="white" opacity="0.7"/></g></svg>`;
+            const iconDataUrl = "data:image/svg+xml;base64," + btoa(svgIcon);
+
+            // 2. アプリの構成ファイル (manifest) を動的生成して読み込み
+            const manifest = {
+                name: "クリスタライズ・ゼリー",
+                short_name: "クリスタゼリー",
+                start_url: window.location.href,
+                display: "standalone",
+                background_color: "#fff0f5",
+                theme_color: "#ff75c3",
+                icons: [{ src: iconDataUrl, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }]
+            };
+            
+            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = URL.createObjectURL(manifestBlob);
+            document.head.appendChild(link);
+
+            // 3. アプリとして認識させるための Service Worker を動的登録
+            const swCode = `
+                self.addEventListener('install', (e) => self.skipWaiting());
+                self.addEventListener('activate', (e) => self.clients.claim());
+                self.addEventListener('fetch', (e) => {
+                    e.respondWith(fetch(e.request).catch(() => new Response('ネットワークに接続してください。')));
+                });
+            `;
+            const swBlob = new Blob([swCode], { type: 'application/javascript' });
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob))
+                    .catch(err => console.log('PWA登録エラー:', err));
+            }
+        }
+
+        // 4. 「インストールボタン」の表示制御
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // PWAインストール要件を満たすブラウザ（AndroidのChromeなど）であればボタンを表示
+            const installBtn = document.getElementById('install-btn');
+            if(installBtn) installBtn.classList.remove('hidden');
+        });
+
+        document.getElementById('install-btn')?.addEventListener('click', async (e) => {
+            e.target.blur();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('install-btn').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // PWA初期化を実行
+        initPWA();
+    </script>
+</body>
+</html>
